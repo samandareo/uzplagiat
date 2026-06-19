@@ -28,8 +28,8 @@ async def create_checkout_session(user_id: str = Depends(get_current_user_id)):
                 }
             ],
             mode="payment",
-            success_url="http://localhost:3000/?success=true",
-            cancel_url="http://localhost:3000/?canceled=true",
+            success_url=f"{settings.FRONTEND_URL}/?success=true",
+            cancel_url=f"{settings.FRONTEND_URL}/?canceled=true",
             client_reference_id=user_id,
         )
         return {"url": session.url}

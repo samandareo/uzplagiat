@@ -24,17 +24,34 @@ export default function PlagiarismChecker() {
   useEffect(() => {
     // Load local state
     const count = parseInt(localStorage.getItem("checksCount") || "0");
-    const premium = localStorage.getItem("isPremium") === "true";
     setChecksCount(count);
-    setIsPremium(premium);
 
     // Check if returning from successful Stripe checkout
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("success") === "true") {
-      setIsPremium(true);
-      localStorage.setItem("isPremium", "true");
+      // Re-fetch user profile to get the real premium status from DB
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) {
+        axios.get("https://api.samandareo.uz/api/auth/me", {
+          headers: { Authorization: `Bearer ${storedToken}` }
+        }).then(res => {
+          setIsPremium(res.data.is_premium);
+        }).catch(() => {
+          // fallback: assume premium since payment succeeded
+          setIsPremium(true);
+        });
+      }
+      // Clean up the URL
+      window.history.replaceState({}, "", "/");
+    } else if (token) {
+      // Fetch real premium status on every load for logged-in users
+      axios.get("https://api.samandareo.uz/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(res => {
+        setIsPremium(res.data.is_premium);
+      }).catch(() => {});
     }
-  }, []);
+  }, [token]);
 
   const handleCheck = async () => {
     if (!text.trim()) {
