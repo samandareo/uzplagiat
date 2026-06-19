@@ -22,11 +22,8 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)):
 
 @router.get("/google/login")
 async def google_login_redirect(request: Request):
-    # Dynamically build the redirect URI based on the incoming request to support both localhost and production
-    base_url = str(request.base_url).rstrip("/")
-    redirect_uri = f"{base_url}/api/auth/google/callback"
-    
     from src.config.settings import settings
+    redirect_uri = f"{settings.BACKEND_URL}/api/auth/google/callback"
     
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
@@ -41,16 +38,13 @@ async def google_login_redirect(request: Request):
 
 @router.get("/google/callback")
 async def google_callback(code: str, request: Request, db: AsyncSession = Depends(get_db)):
-    base_url = str(request.base_url).rstrip("/")
-    redirect_uri = f"{base_url}/api/auth/google/callback"
+    from src.config.settings import settings
+    redirect_uri = f"{settings.BACKEND_URL}/api/auth/google/callback"
     
     auth_service = AuthService(db)
     token = await auth_service.authenticate_google_code(code, redirect_uri)
     
-    # After successful login, redirect the user back to your Next.js frontend with the JWT
-    # Adjust this URL if your frontend is hosted elsewhere in production
-    frontend_url = "http://localhost:3000/auth-success"
-    return RedirectResponse(f"{frontend_url}?token={token.access_token}")
+    return RedirectResponse(f"{settings.FRONTEND_URL}/auth-success?token={token.access_token}")
 
 @router.get("/me")
 async def get_me(user_id: str = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):

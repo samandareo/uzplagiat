@@ -128,22 +128,24 @@ class DetectionService:
 
         plagiarism_percentage = (len(flagged) / len(sentences)) * 100 if sentences else 0.0
 
-        history = DetectionHistory(
-            user_id=user_id,
-            input_text=request.text,
+        result_id = None
+        if user_id is not None:
+            history = DetectionHistory(
+                user_id=user_id,
+                input_text=request.text,
+                plagiarism_percentage=round(plagiarism_percentage, 2),
+                total_sentences=len(sentences),
+                flagged_sentences_count=len(flagged),
+                flagged_sentences=[f.model_dump() for f in flagged]
+            )
+            saved_history = await self.repo.create(history)
+            result_id = str(saved_history.id)
+
+        return CheckResponse(
+            id=result_id or "",
             plagiarism_percentage=round(plagiarism_percentage, 2),
             total_sentences=len(sentences),
             flagged_sentences_count=len(flagged),
-            flagged_sentences=[f.model_dump() for f in flagged]
-        )
-        
-        saved_history = await self.repo.create(history)
-
-        return CheckResponse(
-            id=str(saved_history.id),
-            plagiarism_percentage=saved_history.plagiarism_percentage,
-            total_sentences=saved_history.total_sentences,
-            flagged_sentences_count=saved_history.flagged_sentences_count,
             flagged_sentences=flagged
         )
 
