@@ -25,7 +25,7 @@ export default function BillingPage() {
 
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/auth/me", {
+        const res = await axios.get("https://api.samandareo.uz/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfile(res.data);

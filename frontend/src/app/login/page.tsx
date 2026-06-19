@@ -25,7 +25,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:8000/api/auth/login", {
+      const res = await axios.post("https://api.samandareo.uz/api/auth/login", {
         email,
         password,
       });
@@ -141,7 +141,7 @@ export default function LoginPage() {
 
           <div className="mt-6">
             <a
-              href="http://localhost:8000/api/auth/google/login"
+              href="https://api.samandareo.uz/api/auth/google/login"
               className="w-full flex justify-center items-center gap-3 py-3.5 px-4 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

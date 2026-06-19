@@ -53,7 +53,7 @@ export default function PlagiarismChecker() {
     try {
       const headers = isAuthenticated && token ? { Authorization: `Bearer ${token}` } : {};
       
-      const response = await axios.post("http://localhost:8000/api/plagiarism/check", {
+      const response = await axios.post("https://api.samandareo.uz/api/plagiarism/check", {
         text: text
       }, { headers });
 

@@ -17,7 +17,7 @@ export default function PaywallOverlay() {
     try {
       const token = localStorage.getItem("token"); // or from useAuth if available
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.post("http://localhost:8000/api/checkout/create-session", {}, { headers });
+      const res = await axios.post("https://api.samandareo.uz/api/checkout/create-session", {}, { headers });
       if (res.data.url) {
         window.location.href = res.data.url;
       }

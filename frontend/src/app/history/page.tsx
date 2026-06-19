@@ -33,7 +33,7 @@ export default function HistoryPage() {
 
     const fetchHistory = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/plagiarism/history", {
+        const res = await axios.get("https://api.samandareo.uz/api/plagiarism/history", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
           }
