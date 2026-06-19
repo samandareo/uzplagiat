@@ -14,7 +14,11 @@ app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 # CORS Setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://uzplagiat.samandareo.uz",
+        "http://uzplagiat.samandareo.uz",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
