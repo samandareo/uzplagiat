@@ -57,7 +57,8 @@ async def get_me(user_id: str = Depends(get_current_user_id), db: AsyncSession =
         "user_id": user_id, 
         "email": user.email, 
         "is_premium": user.is_premium,
-        "checks_count": user.checks_count
+        "checks_count": user.checks_count,
+        "subscribed_at": user.subscribed_at.isoformat() if user.subscribed_at else None
     }
 
 from pydantic import BaseModel, Field

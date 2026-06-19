@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { CreditCard, Loader2, CheckCircle, Zap, ShieldAlert } from "lucide-react";
-import { motion } from "framer-motion";
+import { CreditCard, Loader2, CheckCircle, Zap, ShieldAlert, Calendar, PartyPopper } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -16,11 +16,19 @@ export default function BillingPage() {
   const router = useRouter();
   const [fetching, setFetching] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [justSubscribed, setJustSubscribed] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login");
       return;
+    }
+
+    // Detect redirect back from Stripe
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("success") === "true") {
+      setJustSubscribed(true);
+      window.history.replaceState({}, "", "/billing");
     }
 
     const fetchProfile = async () => {
@@ -50,12 +58,34 @@ export default function BillingPage() {
   const isPremium = profile?.is_premium;
   const checksUsed = profile?.checks_count || 0;
   const checksTotal = 5;
+  const subscribedAt = profile?.subscribed_at
+    ? new Date(profile.subscribed_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    : null;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 relative">
       <div className="absolute top-4 right-4 sm:top-12 sm:right-6">
         <LanguageSwitcher />
       </div>
+
+      {/* Post-payment success banner */}
+      <AnimatePresence>
+        {justSubscribed && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mb-8 p-5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-4"
+          >
+            <PartyPopper className="w-7 h-7 text-emerald-600 shrink-0" />
+            <div>
+              <p className="font-bold text-emerald-800">Payment successful! Welcome to Premium.</p>
+              <p className="text-sm text-emerald-600">Your account has been upgraded. Enjoy unlimited checks!</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <h1 className="text-3xl font-extrabold text-slate-900 mb-8">{t('billing.title')}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -71,7 +101,11 @@ export default function BillingPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t('billing.current_plan')}</p>
-              <h2 className="text-2xl font-bold text-slate-900">{isPremium ? t('billing.plan_premium') : t('billing.plan_free')}</h2>
+              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                {isPremium ? (
+                  <><span>{t('billing.plan_premium')}</span><Zap className="w-5 h-5 text-yellow-400" /></>
+                ) : t('billing.plan_free')}
+              </h2>
             </div>
           </div>
           
@@ -81,6 +115,17 @@ export default function BillingPage() {
                 ? t('billing.desc_premium')
                 : t('billing.desc_free')}
             </p>
+
+            {/* Payment date for premium users */}
+            {isPremium && subscribedAt && (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 mb-4">
+                <Calendar className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div>
+                  <p className="text-xs text-emerald-600 font-medium uppercase tracking-wide">Last Payment</p>
+                  <p className="text-slate-800 font-semibold">{subscribedAt}</p>
+                </div>
+              </div>
+            )}
 
             {!isPremium && (
               <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">

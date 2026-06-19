@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from src.config.database import Base
 
 class User(Base):
@@ -10,3 +10,4 @@ class User(Base):
     is_premium = Column(Boolean, default=False)
     checks_count = Column(Integer, default=0)
     google_id = Column(String, unique=True, index=True, nullable=True)
+    subscribed_at = Column(DateTime, nullable=True)

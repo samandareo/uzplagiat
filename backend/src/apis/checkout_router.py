@@ -1,6 +1,7 @@
 import stripe
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
 from src.core.security import get_current_user_id
 from src.config.settings import settings
 from src.config.database import get_db
@@ -28,8 +29,8 @@ async def create_checkout_session(user_id: str = Depends(get_current_user_id)):
                 }
             ],
             mode="payment",
-            success_url=f"{settings.FRONTEND_URL}/?success=true",
-            cancel_url=f"{settings.FRONTEND_URL}/?canceled=true",
+            success_url=f"{settings.FRONTEND_URL}/billing?success=true",
+            cancel_url=f"{settings.FRONTEND_URL}/billing?canceled=true",
             client_reference_id=user_id,
         )
         return {"url": session.url}
@@ -60,6 +61,7 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
                 user = await db.get(User, user_id)
                 if user:
                     user.is_premium = True
+                    user.subscribed_at = datetime.utcnow()
                     await db.commit()
             except ValueError:
                 pass # Invalid user ID format

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { User, Lock, Loader2, Save, CheckCircle } from "lucide-react";
+import { User, Lock, Loader2, Save, CheckCircle, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -14,6 +14,8 @@ export default function ProfilePage() {
   const { isAuthenticated, token } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
+  const [subscribedAt, setSubscribedAt] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -32,6 +34,8 @@ export default function ProfilePage() {
           headers: { Authorization: `Bearer ${token}` }
         });
         setEmail(res.data.email);
+        setIsPremium(res.data.is_premium);
+        setSubscribedAt(res.data.subscribed_at || null);
       } catch (err) {
         console.error("Failed to fetch profile", err);
       } finally {
@@ -89,9 +93,16 @@ export default function ProfilePage() {
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
             <User className="w-8 h-8 text-blue-600" />
           </div>
-          <div>
+          <div className="flex-grow">
             <h1 className="text-2xl font-bold text-slate-900">{t('profile.title')}</h1>
             <p className="text-slate-500 font-medium">{email}</p>
+          </div>
+          <div className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 ${
+            isPremium
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-slate-100 text-slate-600'
+          }`}>
+            {isPremium ? <><Zap className="w-4 h-4 text-yellow-500" /> Premium</> : 'Free Plan'}
           </div>
         </div>
 
