@@ -1,18 +1,28 @@
 "use client";
 
 import { CheckCircle, Zap } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Link from "next/link";
 
 export default function PricingPage() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const { isAuthenticated, token } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      axios.get("https://api.samandareo.uz/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(res => setIsPremium(res.data.is_premium)).catch(() => {});
+    }
+  }, [isAuthenticated, token]);
 
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
@@ -48,6 +58,22 @@ export default function PricingPage() {
           {t('pricing.subtitle')}
         </p>
       </div>
+
+      {isPremium ? (
+        <div className="max-w-lg mx-auto text-center bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-12 text-white shadow-xl">
+          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Zap className="w-10 h-10 text-yellow-300" />
+          </div>
+          <h2 className="text-3xl font-extrabold mb-3">You're on Premium!</h2>
+          <p className="text-blue-100 text-lg mb-8">You already have unlimited access to all features. No upgrade needed.</p>
+          <Link
+            href="/"
+            className="inline-block px-8 py-4 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors"
+          >
+            Go to Checker
+          </Link>
+        </div>
+      ) : (
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
         {/* Free Plan */}
@@ -125,6 +151,7 @@ export default function PricingPage() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

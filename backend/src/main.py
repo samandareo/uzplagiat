@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 import nltk
 
 from src.config.settings import settings
@@ -37,12 +38,12 @@ async def bad_request_exception_handler(request: Request, exc: BadRequestExcepti
 @app.on_event("startup")
 async def startup_event():
     print("Initializing Database Connections...")
-    # Initialize Postgres tables
     async with engine.begin() as conn:
-        # Warning: For production, use Alembic for migrations instead of create_all
         await conn.run_sync(Base.metadata.create_all)
-        
-    # Initialize MongoDB Beanie
+        # Safe column migrations for existing tables
+        await conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscribed_at TIMESTAMP")
+        )
     await init_mongo()
     print("Database connections established.")
 
